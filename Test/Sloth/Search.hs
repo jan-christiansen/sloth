@@ -1,7 +1,7 @@
 module Test.Sloth.Search
   (
     SearchT(..), isCompleteT,
-    
+
     Search(..), isComplete, search, completion, filterSearch, filterIncomplete,
 
     zero, one
@@ -20,6 +20,12 @@ data Search a = Complete a
               | Incomplete a
   deriving Show
 
+
+instance Applicative Search where
+  pure = Complete
+
+  (<*>) = ap
+
 instance Functor Search where
   fmap f (Complete x)   = Complete (f x)
   fmap f (Incomplete x) = Incomplete (f x)
@@ -28,7 +34,7 @@ instance Monad Search where
   return = Complete
 
   Complete x >>= f = f x
-  Incomplete x >>= f = 
+  Incomplete x >>= f =
     case f x of
          Complete y -> Incomplete y
          r          -> r
@@ -87,6 +93,11 @@ instance Functor f => Functor (SearchT f) where
 instance MonadTrans SearchT where
   lift = SearchT . liftM Complete
 
+instance Monad m => Applicative (SearchT m) where
+  pure = return
+
+  (<*>) = ap
+
 instance Monad m => Monad (SearchT m) where
   return = lift . return
 
@@ -105,7 +116,7 @@ instance CoMonad w => CoMonad (SearchT w) where
 
 
 -- | Check whether a SearchT is complete
-isCompleteT :: CoPointed w => SearchT w a -> Bool 
+isCompleteT :: CoPointed w => SearchT w a -> Bool
 isCompleteT (SearchT w) = isComplete (extract w)
 
 
@@ -116,4 +127,3 @@ zero = SearchT . return . Incomplete
 -- | A complete Search with one result
 one :: a -> SearchT (Writer (Sum Int)) a
 one = SearchT . (tell (Sum 1) >>) . return . Complete
-

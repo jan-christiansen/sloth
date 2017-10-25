@@ -9,7 +9,7 @@ module Test.Sloth.Generics
   ) where
 
 
-import Control.Monad.State ( evalState, get, put )
+import Control.Monad.State ( State, evalState, get, put )
 import Data.Data ( Data, Constr, gunfold, fromConstrM )
 
 
@@ -22,7 +22,7 @@ inCompose :: (f (g a) -> f (g b)) -> Compose f g a -> Compose f g b
 inCompose f (Compose x) = Compose (f x)
 
 -- | An implementation of gunfold with additional monadic context
-gunfoldM :: (Data a,Monad m)
+gunfoldM :: Data a
          => (forall b r. Data b => m (c (b -> r)) -> m (c r))
          -> (forall r. r -> m (c r)) -> Constr -> m (c a)
 gunfoldM k z c = compose (gunfold (inCompose k) (Compose . z) c)
@@ -32,9 +32,10 @@ gunfoldM k z c = compose (gunfold (inCompose k) (Compose . z) c)
 gunfoldWithIndex :: Data a => (forall b r. Data b => Int -> c (b -> r) -> c r)
                  -> (forall r. r -> c r) -> Constr -> c a
 gunfoldWithIndex k z c =
-  evalState (gunfoldM applyWithIndex (return . z) c) 0
- where
-  applyWithIndex cf = do
+  evalState (gunfoldM (applyWithIndex k) (return . z) c) 0
+
+applyWithIndex :: (Int -> a -> b) -> State Int a -> State Int b
+applyWithIndex k cf = do
     f <- cf
     n <- get
     put (n+1)

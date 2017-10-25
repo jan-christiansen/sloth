@@ -1,5 +1,5 @@
 name:                     sloth
-version:                  0.0.2
+version:                  0.0.3
 cabal-version:            >= 1.6
 stability:                alpha
 description:              Sloth is a library for testing whether functions are
@@ -8,7 +8,7 @@ synopsis:                 Testing for minimal strictness
 license:                  BSD3
 license-file:		  LICENSE
 author:                   Jan Christiansen
-maintainer:               Jan Christiansen <info@monoid-it.de>
+maintainer:               Jan Christiansen <jan.christiansen@hs-flensburg.de>
 category:                 Testing
 build-type:               Simple
 extra-source-files:
